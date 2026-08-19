@@ -260,12 +260,6 @@ calc.ind <- function(dat, lower1, upper1, lower2, upper2){
 ## easily vectorized. For each upper/lower argument, instead of an 
 ## integer enter a vector with the arguments for the first ratio 
 ## in the first spot, the second ratio in the second spot, etc.
-calc.ind(dat = dat_raw, 
-         lower1 = c(3100, 1600, 1000), 
-         upper1 = c(3700, 1800, 1200),
-         lower2 = c(2780, 2780, 2780), 
-         upper2 = c(2970, 2970, 2970))
-
 calc.ind(dat = dat_OS, 
          lower1 = c(3100, 1600, 1000), 
          upper1 = c(3700, 1800, 1200),
@@ -282,13 +276,17 @@ calc.ind(dat = dat_OS,
 ## cryo library comparison
 
 
-# Load the data as usual
+## Load the data as usual. PCV for OpenSpecy and AMF_macro for BLoP
+dat <- read.csv(file = "test_files_July20/digestion/Bio 1.CSV", header = F)
+colnames(dat) <- c("wavenumber", "spectra")
+dat_bio <- as_OpenSpecy(x = dat)
+
 dat <- read.csv(file = "test_files_July20/digestion/PVC 1.CSV", header = F)
 colnames(dat) <- c("wavenumber", "spectra")
-dat_raw <- as_OpenSpecy(x = dat)
+dat_PVC <- as_OpenSpecy(x = dat)
 
-# Create raw versions of data
-dat_OS1 <- process_spec(x = dat_raw,
+## Create raw versions of data
+dat_bio_raw <- process_spec(x = dat_bio,
                         conform_spec_args = list(range = lib_OS$wavenumber, 
                                                  res = 6),
                         conform_spec = T,
@@ -298,7 +296,7 @@ dat_OS1 <- process_spec(x = dat_raw,
                         subtr_baseline = F,
                         smooth_intens = F,
                         make_rel = F)
-dat_blop1 <- process_spec(x = dat_raw,
+dat_PVC_raw <- process_spec(x = dat_PVC,
                           conform_spec_args = list(range = lib_blop$wavenumber,
                                                    res = 1),
                           conform_spec = T,
@@ -309,8 +307,11 @@ dat_blop1 <- process_spec(x = dat_raw,
                           smooth_intens = F,
                           make_rel = F)
 
-# Create processed versions of data
-dat_OS2 <- process_spec(x = dat_raw,
+plotly_spec(dat_bio, dat_bio_raw)
+plotly_spec(dat_PVC, dat_PVC_raw)
+
+## Create processed versions of data
+dat_bio_proc <- process_spec(x = dat_bio,
                         conform_spec_args = list(range = lib_OS$wavenumber, 
                                                  res = 6),
                         conform_spec = T,
@@ -322,9 +323,9 @@ dat_OS2 <- process_spec(x = dat_raw,
                         smooth_intens_args = list(polynomial = 3, 
                                                   window = 11, 
                                                   derivative = 0),
-                        make_rel = T)
-dat_blop2 <- process_spec(x = dat_raw,
-                          conform_spec_args = list(range = lib_OS$wavenumber, 
+                        make_rel = F)
+dat_PVC_proc <- process_spec(x = dat_PVC,
+                          conform_spec_args = list(range = lib_blop$wavenumber, 
                                                    res = 6),
                           conform_spec = T,
                           adj_intens = T,
@@ -335,11 +336,12 @@ dat_blop2 <- process_spec(x = dat_raw,
                           smooth_intens_args = list(polynomial = 3, 
                                                     window = 11, 
                                                     derivative = 0),
-                          make_rel = T)
+                          make_rel = F)
 
+plotly_spec(dat_bio, dat_bio_proc)
 
-# OpenSpecy matches
-matches_OS_raw1 <- match_spec(x = dat_OS1, 
+## OpenSpecy matches
+matches_OS_raw1 <- match_spec(x = dat_bio_raw, 
                               library = lib_OS, 
                               top_n = 5,
                               na.rm = T,
@@ -347,7 +349,7 @@ matches_OS_raw1 <- match_spec(x = dat_OS1,
 matches_OS1 <- sort_by(matches_OS_raw1[, c("object_id", "match_val", "spectrum_identity")],
                        ~ match_val, decreasing = T)
 
-matches_OS_raw2 <- match_spec(x = dat_OS2, 
+matches_OS_raw2 <- match_spec(x = dat_bio_proc, 
                               library = lib_OS, 
                               top_n = 5,
                               na.rm = T,
@@ -355,48 +357,134 @@ matches_OS_raw2 <- match_spec(x = dat_OS2,
 matches_OS2 <- sort_by(matches_OS_raw2[, c("object_id", "match_val", "spectrum_identity")],
                        ~ match_val, decreasing = T)
 
-# BLoP matches
-matches_blop1 <- match_spec(x = dat_blop1, 
+## BLoP matches
+matches_blop1 <- match_spec(x = dat_PVC_raw, 
                             library = lib_blop, 
                             top_n = 5,
                             na.rm = T)
 
-matches_blop2 <- match_spec(x = dat_blop2, 
+matches_blop2 <- match_spec(x = dat_PVC_proc, 
                             library = lib_blop, 
                             top_n = 5,
                             na.rm = T)
 
-# Inspect match results
+## Inspect match results
 matches_OS1
 matches_OS2
 
 matches_blop1
 matches_blop2
 
-# Visually compare best matches
-plotly_spec(dat_OS1, filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]]),
+## Visually compare best matches
+plotly_spec(dat_bio_raw, filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
-plotly_spec(dat_OS2, filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]]),
+plotly_spec(dat_bio_proc, filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
 
-plotly_spec(dat_blop1, filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]]),
+plotly_spec(dat_PVC_raw, filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
-plotly_spec(dat_blop2, filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]]),
+plotly_spec(dat_PVC_proc, filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
+
+
+## Export data
+write.csv(cbind.data.frame(wavenumber = dat_bio_raw$wavenumber,
+                           spectra = unlist(dat_bio_raw$spectra)), 
+          "Bio_observed_raw.csv")
+write.csv(cbind.data.frame(wavenumber = dat_bio_proc$wavenumber,
+                           spectra = unlist(dat_bio_proc$spectra)), 
+          "Bio_observed_proc.csv")
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]])$spectra)), 
+          "Bio_matched_raw.csv")
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]])$spectra)), 
+          "Bio_matched_proc.csv")
+
+write.csv(cbind.data.frame(wavenumber = dat_PVC_raw$wavenumber,
+                           spectra = unlist(dat_PVC_raw$spectra)), 
+          "PVC_observed_raw.csv")e
+write.csv(cbind.data.frame(wavenumber = dat_PVC_proc$wavenumber,
+                           spectra = unlist(dat_PVC_proc$spectra)), 
+          "PVC_observed_proc.csv")
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]])$spectra)), 
+          "PVC_matched_raw.csv")
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]])$spectra)), 
+          "PVC_matched_proc.csv")
+
+
+
+
+#################################
+## Cryo vs degradation figures ##
+#################################
+## Load data
+dat <- read.csv(file = "test_files_July20/cryo/DS_cryo.CSV", header = F)
+colnames(dat) <- c("wavenumber", "spectra")
+dat_raw_cryo <- as_OpenSpecy(x = dat)
+
+dat <- read.csv(file = "test_files_July20/digestion/PLA 1.CSV", header = F)
+colnames(dat) <- c("wavenumber", "spectra")
+dat_raw_deg <- as_OpenSpecy(x = dat)
+
+## Process data
+dat_cryo <- process_spec(x = dat_raw_cryo,
+                         conform_spec_args = list(range = lib_OS$wavenumber, 
+                                                  res = 6),
+                         conform_spec = T,
+                         adj_intens = T,
+                         restrict_range = T,
+                         flatten_range = T,
+                         subtr_baseline = T,
+                         smooth_intens = T,
+                         smooth_intens_args = list(polynomial = 3, 
+                                                   window = 11, 
+                                                   derivative = 0),
+                         make_rel = F)
+dat_deg <- process_spec(x = dat_raw_deg,
+                        conform_spec_args = list(range = lib_OS$wavenumber, 
+                                                 res = 6),
+                        conform_spec = T,
+                        adj_intens = T,
+                        restrict_range = T,
+                        flatten_range = T,
+                        subtr_baseline = T,
+                        smooth_intens = T,
+                        smooth_intens_args = list(polynomial = 3, 
+                                                  window = 11, 
+                                                  derivative = 0),
+                        make_rel = F)
+
+## Export processed data
+write.csv(cbind.data.frame(wavenumber = dat_cryo$wavenumber, spectra = dat_cryo$spectra), 
+          "Processed_spectra/DS_cryo.csv", row.names = FALSE)
+write.csv(cbind.data.frame(wavenumber = dat_deg$wavenumber, spectra = dat_deg$spectra), 
+          "Processed_spectra/DS_degradation.csv", row.names = FALSE)
+
+## Plot
+plotly_spec(dat_cryo, dat_deg,
+            line = list(color = "blue", width = 5), 
+            line2 = list(dash = "dot", color = "red", width = 5),
+            paper_bgcolor = "white", 
+            plot_bgcolor = "white",
+            font = list(color = "black", size = 20),
+            make_rel = F)
 

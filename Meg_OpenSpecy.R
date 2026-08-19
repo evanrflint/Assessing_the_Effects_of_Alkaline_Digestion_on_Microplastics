@@ -24,7 +24,7 @@ lib_OS <- as_OpenSpecy(list(wavenumber = lib$wavenumber,
                             metadata = lib$metadata[ftir_ids,]))
 
 # Load the BLoP library of Milne and Rochman (2026)
-fldr <- "BLoP SI Library Spectra Files copy/µATR-FTIR Files/BLoP .csv files - with FLoPP duplicates"
+fldr <- "BLoP SI Library Spectra Files copy/ATR-FTIR Files/BLoP .csv files - with FLoPP duplicates"
 pths <- list.files(path = fldr, full.names = TRUE)
 nms <- sapply(strsplit(list.files(path = fldr, full.names = FALSE), split = "[.]"), "[[", 1)
 nms <- gsub(" ", "_", nms)
@@ -339,63 +339,62 @@ dat_PVC_proc <- process_spec(x = dat_PVC,
                           make_rel = F)
 
 plotly_spec(dat_bio, dat_bio_proc)
+plotly_spec(dat_PVC, dat_PVC_proc)
 
 ## OpenSpecy matches
-matches_OS_raw1 <- match_spec(x = dat_bio_raw, 
+matches_bio_raw <- match_spec(x = dat_bio_raw, 
                               library = lib_OS, 
                               top_n = 5,
                               na.rm = T,
                               add_library_metadata = "sample_name")
-matches_OS1 <- sort_by(matches_OS_raw1[, c("object_id", "match_val", "spectrum_identity")],
-                       ~ match_val, decreasing = T)
 
-matches_OS_raw2 <- match_spec(x = dat_bio_proc, 
+matches_bio_proc <- match_spec(x = dat_bio_proc, 
                               library = lib_OS, 
                               top_n = 5,
                               na.rm = T,
                               add_library_metadata = "sample_name")
-matches_OS2 <- sort_by(matches_OS_raw2[, c("object_id", "match_val", "spectrum_identity")],
-                       ~ match_val, decreasing = T)
 
 ## BLoP matches
-matches_blop1 <- match_spec(x = dat_PVC_raw, 
+matches_PVC_raw <- match_spec(x = dat_PVC_raw, 
                             library = lib_blop, 
                             top_n = 5,
                             na.rm = T)
 
-matches_blop2 <- match_spec(x = dat_PVC_proc, 
+matches_PVC_proc <- match_spec(x = dat_PVC_proc, 
                             library = lib_blop, 
                             top_n = 5,
                             na.rm = T)
 
 ## Inspect match results
-matches_OS1
-matches_OS2
+sort_by(matches_bio_raw[, c("object_id", "match_val", "spectrum_identity")],
+        ~ match_val, decreasing = T)
+sort_by(matches_bio_proc[, c("object_id", "match_val", "spectrum_identity")],
+        ~ match_val, decreasing = T)
 
-matches_blop1
-matches_blop2
+matches_PVC_raw
+matches_PVC_proc
 
 ## Visually compare best matches
-plotly_spec(dat_bio_raw, filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]]),
+plotly_spec(dat_bio_raw, filter_spec(lib_OS, logic = matches_bio_raw[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
-plotly_spec(dat_bio_proc, filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]]),
+plotly_spec(dat_bio_proc, filter_spec(lib_OS, logic = matches_bio_proc[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
 
-plotly_spec(dat_PVC_raw, filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]]),
+plotly_spec(dat_PVC_raw, filter_spec(lib_blop, logic = matches_PVC_raw[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
-plotly_spec(dat_PVC_proc, filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]]),
+plotly_spec(dat_PVC_proc, filter_spec(lib_blop, logic = matches_PVC_proc[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 
@@ -410,24 +409,24 @@ write.csv(cbind.data.frame(wavenumber = dat_bio_raw$wavenumber,
 write.csv(cbind.data.frame(wavenumber = dat_bio_proc$wavenumber,
                            spectra = unlist(dat_bio_proc$spectra)), 
           "Bio_observed_proc.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]])$spectra)), 
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_bio_raw[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_OS, logic = matches_bio_raw[[1,"library_id"]])$spectra)), 
           "Bio_matched_raw.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_OS_raw1[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_OS, logic = matches_OS_raw2[[1,"library_id"]])$spectra)), 
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_bio_proc[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_OS, logic = matches_bio_proc[[1,"library_id"]])$spectra)), 
           "Bio_matched_proc.csv")
 
 write.csv(cbind.data.frame(wavenumber = dat_PVC_raw$wavenumber,
                            spectra = unlist(dat_PVC_raw$spectra)), 
-          "PVC_observed_raw.csv")e
+          "PVC_observed_raw.csv")
 write.csv(cbind.data.frame(wavenumber = dat_PVC_proc$wavenumber,
                            spectra = unlist(dat_PVC_proc$spectra)), 
           "PVC_observed_proc.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]])$spectra)), 
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_PVC_raw[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_blop, logic = matches_PVC_raw[[1,"library_id"]])$spectra)), 
           "PVC_matched_raw.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_blop1[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_blop, logic = matches_blop2[[1,"library_id"]])$spectra)), 
+write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_PVC_proc[[1,"library_id"]])$wavenumber,
+                           spectra = unlist(filter_spec(lib_blop, logic = matches_PVC_proc[[1,"library_id"]])$spectra)), 
           "PVC_matched_proc.csv")
 
 

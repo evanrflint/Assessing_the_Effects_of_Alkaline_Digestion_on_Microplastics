@@ -323,7 +323,7 @@ dat_P_proc <- process_spec(x = dat_P,
                         make_rel = F)
 dat_AMF_proc <- process_spec(x = dat_AMF,
                           conform_spec_args = list(range = lib_blop$wavenumber, 
-                                                   res = 6),
+                                                   res = 1),
                           conform_spec = T,
                           adj_intens = T,
                           restrict_range = T,
@@ -396,28 +396,28 @@ plotly_spec(dat_AMF_proc, filter_spec(lib_blop, logic = matches_AMF_raw[[1,"libr
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
 
+## Export P data
+hold <- cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$wavenumber,
+                         spectra = as.numeric(unlist(filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$spectra)))
+hold <- subset(hold, wavenumber %in% dat_P_raw$wavenumber)
+                         
+P_comp <- cbind.data.frame(wavenumber = dat_P_raw$wavenumber,
+                           spectra_raw = unlist(dat_P_raw$spectra)/max(unlist(dat_P_raw$spectra), na.rm=T),
+                           spectra_proc = unlist(dat_P_proc$spectra)/max(unlist(dat_P_proc$spectra), na.rm=T),
+                           spectra_match = hold$spectra/max(hold$spectra, na.rm=T))
+write.csv(P_comp, "P_matching_data.csv")
 
-## Export data
-write.csv(cbind.data.frame(wavenumber = dat_P_raw$wavenumber,
-                           spectra = unlist(dat_P_raw$spectra)), 
-          "P_observed_raw.csv")
-write.csv(cbind.data.frame(wavenumber = dat_P_proc$wavenumber,
-                           spectra = unlist(dat_P_proc$spectra)), 
-          "P_observed_proc.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$spectra)), 
-          "P_matched_raw.csv")
 
-write.csv(cbind.data.frame(wavenumber = dat_AMF_raw$wavenumber,
-                           spectra = unlist(dat_AMF_raw$spectra)), 
-          "AMF_observed_raw.csv")
-write.csv(cbind.data.frame(wavenumber = dat_AMF_proc$wavenumber,
-                           spectra = unlist(dat_AMF_proc$spectra)), 
-          "AMF_observed_proc.csv")
-write.csv(cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]])$wavenumber,
-                           spectra = unlist(filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]])$spectra)), 
-          "AMF_matched_raw.csv")
+## Export AMF data
+hold <- cbind.data.frame(wavenumber = filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]])$wavenumber,
+                         spectra = as.numeric(unlist(filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]])$spectra)))
 
+AMF_comp <- cbind.data.frame(wavenumber = dat_AMF_raw$wavenumber,
+                             spectra_raw = unlist(dat_AMF_raw$spectra)/max(unlist(dat_AMF_raw$spectra), na.rm=T),
+                             spectra_proc = unlist(dat_AMF_proc$spectra)/max(unlist(dat_AMF_proc$spectra), na.rm=T))
+AMF_comp <- subset(AMF_comp, wavenumber %in% hold$wavenumber)
+AMF_comp <- cbind.data.frame(AMF_comp, spectra_match = hold$spectra/max(hold$spectra, na.rm=T))
+write.csv(AMF_comp, "AMF_matching_data.csv")
 
 
 

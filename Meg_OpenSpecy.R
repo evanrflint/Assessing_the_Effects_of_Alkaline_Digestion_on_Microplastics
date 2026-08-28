@@ -50,9 +50,9 @@ macros <- as.data.frame(sapply(pths,
 colnames(macros) <- nms
 
 lib_macro <- as_OpenSpecy(x = read.csv(paste0(fldr, "/AMF white_macro.csv"), 
-                                             header = FALSE)[,1], 
-                         spectra = macros, 
-                         metadata = NULL)
+                                       header = FALSE)[,1], 
+                          spectra = macros, 
+                          metadata = NULL)
 
 # Build the cryo library
 fldr <- "test_files_July20/cryo"
@@ -61,13 +61,13 @@ nms <- sapply(strsplit(list.files(path = fldr, full.names = FALSE), split = "[.]
 nms <- gsub(" ", "_", nms)
 
 cryos <- as.data.frame(sapply(pths, 
-                               function(x) read.csv(file = x, header = F)[,2]))
+                              function(x) read.csv(file = x, header = F)[,2]))
 colnames(cryos) <- nms
 
 lib_cryo <- as_OpenSpecy(x = read.csv(paste0(fldr, "/AMF_cryo.csv"), 
-                                             header = FALSE)[,1], 
-                          spectra = cryos, 
-                          metadata = NULL)
+                                      header = FALSE)[,1], 
+                         spectra = cryos, 
+                         metadata = NULL)
 
 
 ###############################
@@ -287,18 +287,8 @@ dat_AMF <- as_OpenSpecy(x = dat)
 
 ## Create raw versions of data
 dat_P_raw <- process_spec(x = dat_P,
-                        conform_spec_args = list(range = lib_OS$wavenumber, 
-                                                 res = 6),
-                        conform_spec = T,
-                        adj_intens = F,
-                        restrict_range = F,
-                        flatten_range = F,
-                        subtr_baseline = F,
-                        smooth_intens = F,
-                        make_rel = F)
-dat_AMF_raw <- process_spec(x = dat_AMF,
-                          conform_spec_args = list(range = lib_blop$wavenumber,
-                                                   res = 1),
+                          conform_spec_args = list(range = lib_OS$wavenumber, 
+                                                   res = 6),
                           conform_spec = T,
                           adj_intens = F,
                           restrict_range = F,
@@ -306,59 +296,69 @@ dat_AMF_raw <- process_spec(x = dat_AMF,
                           subtr_baseline = F,
                           smooth_intens = F,
                           make_rel = F)
+dat_AMF_raw <- process_spec(x = dat_AMF,
+                            conform_spec_args = list(range = lib_blop$wavenumber,
+                                                     res = 1),
+                            conform_spec = T,
+                            adj_intens = F,
+                            restrict_range = F,
+                            flatten_range = F,
+                            subtr_baseline = F,
+                            smooth_intens = F,
+                            make_rel = F)
 
 ## Create processed versions of data
 dat_P_proc <- process_spec(x = dat_P,
-                        conform_spec_args = list(range = lib_OS$wavenumber, 
-                                                 res = 6),
-                        conform_spec = T,
-                        adj_intens = T,
-                        restrict_range = T,
-                        flatten_range = T,
-                        subtr_baseline = T,
-                        smooth_intens = T,
-                        smooth_intens_args = list(polynomial = 3, 
-                                                  window = 11, 
-                                                  derivative = 0),
-                        make_rel = F)
+                           conform_spec_args = list(range = lib_OS$wavenumber, 
+                                                    res = 6),
+                           conform_spec = T,
+                           adj_intens = T,
+                           restrict_range = T,
+                           flatten_range = T,
+                           subtr_baseline = T,
+                           smooth_intens = T,
+                           smooth_intens_args = list(polynomial = 3, 
+                                                     window = 11, 
+                                                     derivative = 0),
+                           make_rel = F)
 dat_AMF_proc <- process_spec(x = dat_AMF,
-                          conform_spec_args = list(range = lib_blop$wavenumber, 
-                                                   res = 1),
-                          conform_spec = T,
-                          adj_intens = T,
-                          restrict_range = T,
-                          flatten_range = T,
-                          subtr_baseline = T,
-                          smooth_intens = T,
-                          smooth_intens_args = list(polynomial = 3, 
-                                                    window = 11, 
-                                                    derivative = 0),
-                          make_rel = F)
+                             conform_spec_args = list(range = lib_blop$wavenumber, 
+                                                      res = 1),
+                             conform_spec = T,
+                             adj_intens = T,
+                             restrict_range = T,
+                             flatten_range = T,
+                             subtr_baseline = T,
+                             smooth_intens = T,
+                             smooth_intens_args = list(polynomial = 3, 
+                                                       window = 11, 
+                                                       derivative = 0),
+                             make_rel = F)
 
 
 ## OpenSpecy matches
 matches_P_raw <- match_spec(x = dat_P_raw, 
-                              library = lib_OS, 
-                              top_n = 5,
-                              na.rm = T,
-                              add_library_metadata = "sample_name")
+                            library = lib_OS, 
+                            top_n = 5,
+                            na.rm = T,
+                            add_library_metadata = "sample_name")
 
 matches_P_proc <- match_spec(x = dat_P_proc, 
-                              library = lib_OS, 
-                              top_n = 5,
-                              na.rm = T,
-                              add_library_metadata = "sample_name")
+                             library = lib_OS, 
+                             top_n = 5,
+                             na.rm = T,
+                             add_library_metadata = "sample_name")
 
 ## BLoP matches
 matches_AMF_raw <- match_spec(x = dat_AMF_raw, 
-                            library = lib_blop, 
-                            top_n = 5,
-                            na.rm = T)
+                              library = lib_blop, 
+                              top_n = 5,
+                              na.rm = T)
 
 matches_AMF_proc <- match_spec(x = dat_AMF_proc, 
-                            library = lib_blop, 
-                            top_n = 5,
-                            na.rm = T)
+                               library = lib_blop, 
+                               top_n = 5,
+                               na.rm = T)
 
 ## Inspect match results
 sort_by(matches_P_raw[, c("object_id", "match_val", "spectrum_identity")],
@@ -400,7 +400,7 @@ plotly_spec(dat_AMF_proc, filter_spec(lib_blop, logic = matches_AMF_raw[[1,"libr
 hold <- cbind.data.frame(wavenumber = filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$wavenumber,
                          spectra = as.numeric(unlist(filter_spec(lib_OS, logic = matches_P_proc[[1,"library_id"]])$spectra)))
 hold <- subset(hold, wavenumber %in% dat_P_raw$wavenumber)
-                         
+
 P_comp <- cbind.data.frame(wavenumber = dat_P_raw$wavenumber,
                            spectra_raw = unlist(dat_P_raw$spectra)/max(unlist(dat_P_raw$spectra), na.rm=T),
                            spectra_proc = unlist(dat_P_proc$spectra)/max(unlist(dat_P_proc$spectra), na.rm=T),
@@ -475,4 +475,6 @@ plotly_spec(dat_cryo, dat_deg,
             plot_bgcolor = "white",
             font = list(color = "black", size = 20),
             make_rel = F)
+
+
 

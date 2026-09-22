@@ -383,7 +383,7 @@ plotly_spec(dat_P_proc, filter_spec(lib_OS, logic = matches_P_proc[[1,"library_i
             plot_bgcolor = "white",
             font = list(color = "black", size = 20))
 
-plotly_spec(dat_AMF_raw, filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]]),
+   plotly_spec(dat_AMF_raw, filter_spec(lib_blop, logic = matches_AMF_raw[[1,"library_id"]]),
             line = list(color = "blue", width = 5), 
             line2 = list(dash = "dot", color = "red", width = 5),
             paper_bgcolor = "white", 

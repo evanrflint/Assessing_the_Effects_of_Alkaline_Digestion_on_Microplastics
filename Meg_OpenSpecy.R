@@ -24,6 +24,8 @@ lib_OS <- as_OpenSpecy(list(wavenumber = lib$wavenumber,
                             metadata = lib$metadata[ftir_ids,]))
 
 # Load the BLoP library of Milne and Rochman (2026)
+# Files must be downloaded from DOI:10.1021/acs.est.5c18940 and saved in
+# the correct path.
 fldr <- "BLoP SI Library Spectra Files copy/ATR-FTIR Files/BLoP .csv files - with FLoPP duplicates"
 pths <- list.files(path = fldr, full.names = TRUE)
 nms <- sapply(strsplit(list.files(path = fldr, full.names = FALSE), split = "[.]"), "[[", 1)

@@ -26,7 +26,7 @@ lib_OS <- as_OpenSpecy(list(wavenumber = lib$wavenumber,
 # Load the BLoP library of Milne and Rochman (2026)
 # Files must be downloaded from DOI:10.1021/acs.est.5c18940 and saved in
 # the correct path. The "μATR-FTIR Files" folder loads in with a 
-# problematic leading charater on some systems and should be renamed 
+# problematic leading character on some systems and should be renamed 
 # to "ATR-FTIR Files" .
 fldr <- "BLoP SI Library Spectra Files copy/ATR-FTIR Files/BLoP .csv files - with FLoPP duplicates"
 pths <- list.files(path = fldr, full.names = TRUE)
